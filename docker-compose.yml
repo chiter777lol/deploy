@@ -1,0 +1,56 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: shop_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: securepassword123
+      MONGO_INITDB_DATABASE: internet-shop
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - shop_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shop_backend
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - MONGO_URI=mongodb://admin:securepassword123@mongodb:27017/internet-shop?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - shop_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: shop_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - shop_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  shop_network:
+    driver: bridge

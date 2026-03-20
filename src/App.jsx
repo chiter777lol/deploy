@@ -7,6 +7,7 @@ import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminProductsPage from './pages/AdminProductsPage'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
@@ -23,6 +24,11 @@ const App = () => {
         <Route path="/checkout" element={
           <PrivateRoute>
             <CheckoutPage />
+          </PrivateRoute>
+        } />
+        <Route path="/profile" element={
+          <PrivateRoute>
+            <ProfilePage />
           </PrivateRoute>
         } />
         <Route path="/login" element={<LoginPage />} />

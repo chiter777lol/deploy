@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
 import { logout } from '../store/authSlice'
 import SearchBar from './SearchBar'
 
@@ -16,47 +15,51 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4">
-        {/* Верхняя строка */}
-        <div className="flex justify-between items-center py-4">
-          <Link to="/" className="text-2xl font-bold text-blue-600">
-            Internet-Shop
+    <header className="bg-white border-b-2 border-[#89CFF0] sticky top-0 z-50 shadow-md">
+      <div className="container-custom">
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="text-2xl font-bold text-[#FF6B6B] hover:text-[#FF5252]">
+            MODA
           </Link>
           
-          <div className="flex items-center space-x-4">
-            <Link to="/cart" className="relative">
-              <ShoppingCartIcon className="h-6 w-6 text-gray-600" />
+          <div className="flex items-center gap-6">
+            <Link to="/cart" className="relative text-sm font-medium text-[#1e3a5f] hover:text-[#FF6B6B]">
+              Корзина
               {cartItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-4 bg-[#FF6B6B] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItems}
                 </span>
               )}
             </Link>
             
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <UserIcon className="h-5 w-5 text-gray-600" />
-                <span className="text-sm">{user?.name}</span>
+              <div className="flex items-center gap-4">
+                <Link to="/profile" className="flex items-center gap-2 group">
+                  <img 
+                    src={user?.avatar} 
+                    alt={user?.name}
+                    className="w-8 h-8 rounded-full border-2 border-[#89CFF0] group-hover:border-[#FF6B6B] transition"
+                  />
+                  <span className="text-sm font-medium text-[#1e3a5f] hidden sm:inline">{user?.name?.split(' ')[0]}</span>
+                </Link>
                 {user?.role === 'admin' && (
-                  <Link to="/admin/products" className="text-sm text-blue-600 hover:underline">
+                  <Link to="/admin/products" className="text-sm font-medium text-[#1e3a5f] hover:text-[#FF6B6B]">
                     Админ
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-red-600 hover:underline"
+                  className="text-sm font-medium text-[#89CFF0] hover:text-[#FF6B6B]"
                 >
                   Выйти
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Link to="/login" className="text-sm text-blue-600 hover:underline">
+              <div className="flex items-center gap-4">
+                <Link to="/login" className="text-sm font-medium text-[#1e3a5f] hover:text-[#FF6B6B]">
                   Вход
                 </Link>
-                <span className="text-gray-400">|</span>
-                <Link to="/register" className="text-sm text-blue-600 hover:underline">
+                <Link to="/register" className="text-sm bg-[#FF6B6B] text-white px-4 py-1.5 rounded-full hover:bg-[#FF5252] transition shadow-md">
                   Регистрация
                 </Link>
               </div>
@@ -64,8 +67,7 @@ const Header = () => {
           </div>
         </div>
         
-        {/* Поисковая строка */}
-        <div className="py-4 border-t">
+        <div className="py-4 border-t-2 border-[#89CFF0]/30">
           <SearchBar />
         </div>
       </div>

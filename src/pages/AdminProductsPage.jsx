@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '../api'
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { productApi, categoryApi } from '../api'
 import toast from 'react-hot-toast'
 
 const AdminProductsPage = () => {
@@ -19,16 +18,16 @@ const AdminProductsPage = () => {
 
   const { data: products } = useQuery({
     queryKey: ['products'],
-    queryFn: () => api.getProducts().then(res => res.data)
+    queryFn: () => productApi.getAll().then(res => res.data)
   })
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => api.getCategories().then(res => res.data)
+    queryFn: () => categoryApi.getAll().then(res => res.data)
   })
 
   const createMutation = useMutation({
-    mutationFn: (newProduct) => api.createProduct(newProduct),
+    mutationFn: (newProduct) => productApi.create(newProduct),
     onSuccess: () => {
       queryClient.invalidateQueries(['products'])
       resetForm()
@@ -37,7 +36,7 @@ const AdminProductsPage = () => {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => api.updateProduct(id, data),
+    mutationFn: ({ id, data }) => productApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['products'])
       resetForm()
@@ -47,7 +46,7 @@ const AdminProductsPage = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => api.deleteProduct(id),
+    mutationFn: (id) => productApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['products'])
       toast.success('Товар удален')
@@ -104,32 +103,32 @@ const AdminProductsPage = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Управление товарами</h1>
+      <h1 className="text-2xl font-light text-[#1e3a5f] mb-6">Управление товарами</h1>
       
       {/* Форма добавления/редактирования */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30 p-6 mb-8">
+        <h2 className="text-lg font-medium text-[#1e3a5f] mb-4">
           {editingProduct ? 'Редактирование товара' : 'Добавление товара'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Название</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Название</label>
               <input
                 type="text"
                 required
-                className="input-field"
+                className="input"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Категория</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Категория</label>
               <select
                 required
-                className="input-field"
+                className="input"
                 value={formData.categoryId}
                 onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
               >
@@ -141,66 +140,69 @@ const AdminProductsPage = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Цена</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Цена (₽)</label>
               <input
                 type="number"
                 required
                 min="0"
-                className="input-field"
+                className="input"
                 value={formData.price}
                 onChange={(e) => setFormData({...formData, price: e.target.value})}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Количество</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Количество</label>
               <input
                 type="number"
                 required
                 min="0"
-                className="input-field"
+                className="input"
                 value={formData.stock}
                 onChange={(e) => setFormData({...formData, stock: e.target.value})}
               />
             </div>
             
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1">URL изображения</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">URL изображения</label>
               <input
                 type="url"
                 required
-                className="input-field"
+                className="input"
                 value={formData.image}
                 onChange={(e) => setFormData({...formData, image: e.target.value})}
+                placeholder="https://images.unsplash.com/photo-..."
               />
             </div>
             
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1">Описание</label>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Описание</label>
               <textarea
                 required
                 rows="3"
-                className="input-field"
+                className="input"
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Подробное описание товара..."
               />
             </div>
             
             <div className="col-span-2">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm text-[#1e3a5f] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.available}
                   onChange={(e) => setFormData({...formData, available: e.target.checked})}
+                  className="w-5 h-5"
                 />
                 <span>Товар доступен для продажи</span>
               </label>
             </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <button type="submit" className="btn-primary">
-              {editingProduct ? 'Сохранить' : 'Добавить'}
+              {editingProduct ? 'Сохранить изменения' : 'Добавить товар'}
             </button>
             
             {editingProduct && (
@@ -210,7 +212,7 @@ const AdminProductsPage = () => {
                   resetForm()
                   setEditingProduct(null)
                 }}
-                className="btn-secondary"
+                className="btn-outline"
               >
                 Отмена
               </button>
@@ -220,45 +222,65 @@ const AdminProductsPage = () => {
       </div>
       
       {/* Таблица товаров */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30 overflow-hidden">
         <table className="min-w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-[#f0f7ff]">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Наименование</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Категория</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Стоимость</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Кол-во</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Фото</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Наименование</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Категория</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Цена</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Кол-во</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Фото</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#89CFF0] uppercase">Действия</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-[#89CFF0]/30">
             {products?.map(product => {
               const category = categories?.find(c => c.id === product.categoryId)
               return (
-                <tr key={product.id}>
-                  <td className="px-6 py-4">{product.id}</td>
-                  <td className="px-6 py-4">{product.name}</td>
-                  <td className="px-6 py-4">{category?.name}</td>
-                  <td className="px-6 py-4">{product.price} ₽</td>
-                  <td className="px-6 py-4">{product.stock}</td>
-                  <td className="px-6 py-4">
-                    <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded" />
+                <tr key={product.id} className="hover:bg-[#f0f7ff] transition">
+                  <td className="px-6 py-4 text-sm text-[#1e3a5f]">{product.id}</td>
+                  <td className="px-6 py-4 text-sm text-[#1e3a5f] font-medium">{product.name}</td>
+                  <td className="px-6 py-4 text-sm text-[#1e3a5f]">
+                    <span className="bg-[#FFEAA7] px-2 py-1 rounded-full text-xs">
+                      {category?.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-[#FF6B6B] font-bold">{product.price} ₽</td>
+                  <td className="px-6 py-4 text-sm text-[#1e3a5f]">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      product.stock > 10 ? 'bg-[#b6e3f4]' : 'bg-[#FFEAA7]'
+                    }`}>
+                      {product.stock} шт.
+                    </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-2">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-10 h-10 object-cover rounded-lg border-2 border-[#89CFF0]/30"
+                      onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = 'https://api.dicebear.com/7.x/icons/svg?icon=image&backgroundColor=f0f7ff'
+                      }}
+                    />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-[#89CFF0] hover:text-[#FF6B6B] transition text-lg"
+                        title="Редактировать"
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        ✎
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-[#FF6B6B] hover:text-[#FF5252] transition text-lg"
+                        title="Удалить"
                       >
-                        <TrashIcon className="h-5 w-5" />
+                        ×
                       </button>
                     </div>
                   </td>
@@ -267,6 +289,12 @@ const AdminProductsPage = () => {
             })}
           </tbody>
         </table>
+        
+        {products?.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-[#89CFF0]">Нет товаров. Добавьте первый товар!</p>
+          </div>
+        )}
       </div>
     </div>
   )

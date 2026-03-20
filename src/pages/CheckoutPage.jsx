@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { api } from '../api'
+import { orderApi } from '../api'
 import { clearCart } from '../store/cartSlice'
 import toast from 'react-hot-toast'
 
@@ -14,12 +14,14 @@ const CheckoutPage = () => {
     first_name: user?.name?.split(' ')[0] || '',
     last_name: user?.name?.split(' ')[1] || '',
     email: user?.email || '',
-    address: '',
+    address: user?.address || '',
     postal_code: '',
     city: '',
-    phone: '',
+    phone: user?.phone || '',
     payment_method: 'card',
-    delivery_method: 'courier'
+    delivery_method: 'courier',
+    newsletter: false,
+    save_info: false
   })
 
   const handleSubmit = async (e) => {
@@ -31,11 +33,10 @@ const CheckoutPage = () => {
         user_id: user.id,
         items: items,
         total: total,
-        status: 'new',
-        created: new Date().toISOString()
+        status: 'new'
       }
       
-      await api.createOrder(orderData)
+      await orderApi.create(orderData)
       dispatch(clearCart())
       toast.success('Заказ успешно оформлен!')
       navigate('/')
@@ -50,170 +51,177 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Оформление заказа</h1>
+    <div className="max-w-3xl mx-auto">
+      <h1 className="text-3xl font-light text-[#1e3a5f] mb-8">Оформление заказа</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-xl font-semibold mb-4">Контактная информация</h2>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Имя</label>
-            <input
-              type="text"
-              required
-              className="input-field"
-              value={formData.first_name}
-              onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Фамилия</label>
-            <input
-              type="text"
-              required
-              className="input-field"
-              value={formData.last_name}
-              onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-            />
-          </div>
-        </div>
-        
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30 p-8 space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"
-            required
-            className="input-field"
-            value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Телефон</label>
-          <input
-            type="tel"
-            required
-            className="input-field"
-            value={formData.phone}
-            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-          />
-        </div>
-        
-        <h2 className="text-xl font-semibold mb-4 mt-6">Адрес доставки</h2>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Город</label>
-          <input
-            type="text"
-            required
-            className="input-field"
-            value={formData.city}
-            onChange={(e) => setFormData({...formData, city: e.target.value})}
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Индекс</label>
+          <h2 className="text-lg font-medium text-[#1e3a5f] mb-4">Контактная информация</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Имя</label>
+              <input
+                type="text"
+                required
+                className="input"
+                value={formData.first_name}
+                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Фамилия</label>
+              <input
+                type="text"
+                required
+                className="input"
+                value={formData.last_name}
+                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-[#89CFF0] mb-1">Email</label>
             <input
-              type="text"
+              type="email"
               required
-              className="input-field"
-              value={formData.postal_code}
-              onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
+              className="input"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium mb-1">Адрес</label>
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-[#89CFF0] mb-1">Телефон</label>
             <input
-              type="text"
+              type="tel"
               required
-              className="input-field"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
+              className="input"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              placeholder="+7 (999) 123-45-67"
             />
           </div>
         </div>
         
-        <h2 className="text-xl font-semibold mb-4 mt-6">Способ доставки</h2>
-        
-        <div className="space-y-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="courier"
-              checked={formData.delivery_method === 'courier'}
-              onChange={(e) => setFormData({...formData, delivery_method: e.target.value})}
-            />
-            <span>Курьером</span>
-          </label>
-          
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="pickup"
-              checked={formData.delivery_method === 'pickup'}
-              onChange={(e) => setFormData({...formData, delivery_method: e.target.value})}
-            />
-            <span>Самовывоз</span>
-          </label>
-          
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="post"
-              checked={formData.delivery_method === 'post'}
-              onChange={(e) => setFormData({...formData, delivery_method: e.target.value})}
-            />
-            <span>Почта России</span>
-          </label>
+        <div className="border-t-2 border-[#89CFF0]/30 pt-6">
+          <h2 className="text-lg font-medium text-[#1e3a5f] mb-4">Адрес доставки</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Город</label>
+              <input
+                type="text"
+                required
+                className="input"
+                value={formData.city}
+                onChange={(e) => setFormData({...formData, city: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Индекс</label>
+              <input
+                type="text"
+                className="input"
+                value={formData.postal_code}
+                onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#89CFF0] mb-1">Адрес</label>
+              <input
+                type="text"
+                required
+                className="input"
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+              />
+            </div>
+          </div>
         </div>
         
-        <h2 className="text-xl font-semibold mb-4 mt-6">Способ оплаты</h2>
-        
-        <div className="space-y-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="card"
-              checked={formData.payment_method === 'card'}
-              onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
-            />
-            <span>Банковская карта</span>
-          </label>
-          
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="cash"
-              checked={formData.payment_method === 'cash'}
-              onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
-            />
-            <span>Наличными при получении</span>
-          </label>
-          
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              value="online"
-              checked={formData.payment_method === 'online'}
-              onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
-            />
-            <span>Онлайн-оплата</span>
-          </label>
+        <div className="border-t-2 border-[#89CFF0]/30 pt-6">
+          <h2 className="text-lg font-medium text-[#1e3a5f] mb-4">Способ доставки</h2>
+          <div className="space-y-3">
+            {[
+              { value: 'courier', label: 'Курьером', price: 300 },
+              { value: 'pickup', label: 'Самовывоз', price: 0 },
+              { value: 'post', label: 'Почта России', price: 200 }
+            ].map(option => (
+              <label key={option.value} className="flex items-center justify-between p-4 border-2 border-[#89CFF0] rounded-xl cursor-pointer hover:border-[#FF6B6B] transition bg-white">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value={option.value}
+                    checked={formData.delivery_method === option.value}
+                    onChange={(e) => setFormData({...formData, delivery_method: e.target.value})}
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium text-[#1e3a5f]">{option.label}</span>
+                </div>
+                <span className="text-sm font-bold text-[#FF6B6B]">{option.price > 0 ? `${option.price} ₽` : 'Бесплатно'}</span>
+              </label>
+            ))}
+          </div>
         </div>
         
-        <div className="border-t pt-4 mt-6">
-          <div className="flex justify-between items-center text-xl mb-6">
-            <span className="font-semibold">Итого к оплате:</span>
-            <span className="font-bold text-blue-600">{total.toLocaleString()} ₽</span>
+        <div className="border-t-2 border-[#89CFF0]/30 pt-6">
+          <h2 className="text-lg font-medium text-[#1e3a5f] mb-4">Способ оплаты</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { value: 'card', label: 'Карта' },
+              { value: 'cash', label: 'Наличные' },
+              { value: 'online', label: 'Онлайн' }
+            ].map(option => (
+              <label key={option.value} className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition ${
+                formData.payment_method === option.value 
+                  ? 'border-[#FF6B6B] bg-[#FFEAA7]' 
+                  : 'border-[#89CFF0] hover:border-[#FF6B6B] bg-white'
+              }`}>
+                <input
+                  type="radio"
+                  name="payment"
+                  value={option.value}
+                  checked={formData.payment_method === option.value}
+                  onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
+                  className="sr-only"
+                />
+                <span className="text-xs font-medium text-[#1e3a5f]">{option.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        
+        <div className="border-t-2 border-[#89CFF0]/30 pt-6">
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.newsletter}
+                onChange={(e) => setFormData({...formData, newsletter: e.target.checked})}
+                className="w-5 h-5"
+              />
+              <span className="text-sm text-[#1e3a5f]">Получать новости о скидках</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.save_info}
+                onChange={(e) => setFormData({...formData, save_info: e.target.checked})}
+                className="w-5 h-5"
+              />
+              <span className="text-sm text-[#1e3a5f]">Сохранить данные для следующих покупок</span>
+            </label>
+          </div>
+        </div>
+        
+        <div className="border-t-2 border-[#89CFF0]/30 pt-6">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-lg text-[#1e3a5f]">Итого:</span>
+            <span className="text-3xl font-bold text-[#FF6B6B]">{total.toLocaleString()} ₽</span>
           </div>
           
-          <button type="submit" className="btn-primary w-full text-lg py-3">
+          <button type="submit" className="w-full btn-primary py-4 text-lg">
             Подтвердить заказ
           </button>
         </div>

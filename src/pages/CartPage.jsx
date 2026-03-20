@@ -7,41 +7,40 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Корзина пуста</h2>
-        <p className="text-gray-600 mb-8">Добавьте товары в корзину, чтобы оформить заказ</p>
-        <Link to="/products" className="btn-primary">
-          Перейти к покупкам
-        </Link>
+      <div className="max-w-2xl mx-auto text-center py-12">
+        <div className="bg-white rounded-2xl p-12 border-2 border-[#89CFF0]/30 shadow-lg">
+          <h2 className="text-2xl font-light text-[#1e3a5f] mb-3">Корзина пуста</h2>
+          <p className="text-sm text-[#89CFF0] mb-6">Добавьте товары, чтобы оформить заказ</p>
+          <Link to="/products" className="btn-primary inline-block">
+            Перейти к покупкам
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Корзина</h1>
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-light text-[#1e3a5f] mb-8">Корзина</h1>
       
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30 p-6 mb-6">
         {items.map(item => (
           <CartItem key={item.id} item={item} />
         ))}
       </div>
       
-      {/* Итоговая стоимость */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center text-xl">
-          <span className="font-semibold">Итого:</span>
-          <span className="font-bold text-blue-600">{total.toLocaleString()} ₽</span>
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30 p-6">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-lg text-[#1e3a5f]">Итого:</span>
+          <span className="text-3xl font-bold text-[#FF6B6B]">{total.toLocaleString()} ₽</span>
         </div>
         
-        <div className="mt-6">
-          <Link 
-            to="/checkout" 
-            className="btn-primary w-full text-center block text-lg py-3"
-          >
-            Оформить заказ
-          </Link>
-        </div>
+        <Link 
+          to="/checkout" 
+          className="btn-primary w-full text-center block text-lg py-3"
+        >
+          Оформить заказ
+        </Link>
       </div>
     </div>
   )

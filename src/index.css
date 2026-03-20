@@ -4,20 +4,74 @@
 
 @layer base {
   body {
-    @apply bg-gray-50;
+    @apply bg-[#f0f7ff] font-['Inter',sans-serif];
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-light tracking-tight text-[#1e3a5f];
+  }
+  
+  /* Красивые чекбоксы и радио */
+  input[type="checkbox"] {
+    @apply appearance-none w-5 h-5 border-2 border-[#89CFF0] rounded-md bg-white checked:bg-[#FF6B6B] checked:border-[#FF6B6B] transition-all duration-200 cursor-pointer relative;
+  }
+  
+  input[type="checkbox"]:checked::after {
+    content: "✓";
+    @apply absolute text-white text-xs font-bold inset-0 flex items-center justify-center;
+  }
+  
+  input[type="radio"] {
+    @apply appearance-none w-5 h-5 border-2 border-[#89CFF0] rounded-full bg-white checked:border-[#FF6B6B] checked:border-4 transition-all duration-200 cursor-pointer;
+  }
+  
+  input[type="radio"]:checked {
+    @apply border-[#FF6B6B] bg-white;
+  }
+  
+  select, textarea {
+    @apply border-2 border-[#89CFF0] rounded-xl focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 outline-none transition-all bg-white text-[#1e3a5f];
   }
 }
 
 @layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition;
+    @apply bg-[#FF6B6B] text-white px-6 py-3 rounded-xl hover:bg-[#FF5252] transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-[#89CFF0] text-[#1e3a5f] px-6 py-3 rounded-xl hover:bg-[#89CFF0] hover:text-white transition-all font-medium;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition;
+    @apply bg-[#FFEAA7] text-[#1e3a5f] px-6 py-3 rounded-xl hover:bg-[#FFE48F] transition-all font-medium;
   }
   
-  .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+  .card {
+    @apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#89CFF0]/30;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 border-2 border-[#89CFF0] rounded-xl focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 outline-none transition-all bg-white text-[#1e3a5f] placeholder-[#89CFF0]/50;
+  }
+  
+  .badge {
+    @apply px-3 py-1 text-xs font-medium rounded-full;
+  }
+  
+  .badge-blue {
+    @apply badge bg-[#89CFF0] text-[#1e3a5f];
+  }
+  
+  .badge-yellow {
+    @apply badge bg-[#FFEAA7] text-[#1e3a5f];
+  }
+  
+  .badge-red {
+    @apply badge bg-[#FF6B6B] text-white;
   }
 }

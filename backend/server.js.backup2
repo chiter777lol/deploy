@@ -1,0 +1,195 @@
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const path = require('path');
+
+// Импорт моделей
+const User = require('./models/User');
+const Category = require('./models/Category');
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+
+dotenv.config();
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Подключение к MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB подключен'))
+  .catch(err => console.log('Ошибка подключения к MongoDB:', err));
+
+// Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'API работает!' });
+});
+
+// Categories routes
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/api/categories/:id', async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Категория не найдена' });
+    }
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Products routes
+app.get('/api/products', async (req, res) => {
+  try {
+    let query = {};
+    
+    if (req.query.categoryId) {
+      query.categoryId = req.query.categoryId;
+    }
+    
+    let products = await Product.find(query).populate('categoryId');
+    
+    if (req.query.search) {
+      const searchTerm = req.query.search.toLowerCase();
+      products = products.filter(p => 
+        p.name.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    if (req.query.sort === 'price_asc') {
+      products.sort((a, b) => a.price - b.price);
+    } else if (req.query.sort === 'price_desc') {
+      products.sort((a, b) => b.price - a.price);
+    }
+    
+    if (req.query._limit) {
+      products = products.slice(0, parseInt(req.query._limit));
+    }
+    
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('categoryId');
+    if (!product) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!product) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.json(product);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Товар не найден' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Users routes
+app.get('/api/users', async (req, res) => {
+  try {
+    if (req.query.email && req.query.password) {
+      const user = await User.findOne({ 
+        email: req.query.email, 
+        password: req.query.password 
+      });
+      res.json(user ? [user] : []);
+    } else {
+      const users = await User.find();
+      res.json(users);
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/users', async (req, res) => {
+  try {
+    const user = new User(req.body);
+    await user.save();
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Orders routes
+app.get('/api/orders', async (req, res) => {
+  try {
+    if (req.query.userId) {
+      const orders = await Order.find({ userId: req.query.userId });
+      res.json(orders);
+    } else {
+      const orders = await Order.find();
+      res.json(orders);
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/orders', async (req, res) => {
+  try {
+    const order = new Order(req.body);
+    await order.save();
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
