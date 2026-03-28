@@ -7,33 +7,37 @@ const admin = require('../middleware/admin');
 // GET /api/products
 router.get('/', async (req, res) => {
   try {
-    let query = {};
+    console.log('Запрос к /api/products');
+    console.log('Параметры запроса:', req.query);
     
+    let query = {};
+
     if (req.query.categoryId) {
+      console.log('Фильтр по категории:', req.query.categoryId);
       query.categoryId = req.query.categoryId;
     }
-    
+
+    let products = await Product.find(query);
+    console.log('Найдено товаров:', products.length);
+    console.log('Пример товара:', products[0] ? { name: products[0].name, categoryId: products[0].categoryId } : 'нет товаров');
+
     if (req.query.search) {
       const searchTerm = req.query.search.toLowerCase();
-      const products = await Product.find(query);
-      const filtered = products.filter(p => 
+      products = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm)
       );
-      return res.json(filtered);
     }
-    
-    let products = await Product.find(query);
-    
+
     if (req.query.sort === 'price_asc') {
       products.sort((a, b) => a.price - b.price);
     } else if (req.query.sort === 'price_desc') {
       products.sort((a, b) => b.price - a.price);
     }
-    
+
     if (req.query._limit) {
       products = products.slice(0, parseInt(req.query._limit));
     }
-    
+
     res.json(products);
   } catch (error) {
     console.error('Ошибка при получении товаров:', error);
