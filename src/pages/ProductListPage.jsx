@@ -40,6 +40,9 @@ const ProductListPage = () => {
 
   if (isLoading) return <div className="text-center py-8">Загрузка...</div>
 
+  const categoryName = categoryId && categoryId !== 'undefined' && category ? category.name : 'Все товары'
+  const searchText = searchQuery ? `Поиск: ${searchQuery}` : categoryName
+
   return (
     <div className="grid grid-cols-12 gap-6">
       <div className="col-span-3">
@@ -50,17 +53,15 @@ const ProductListPage = () => {
       </div>
       
       <div className="col-span-9">
-        <h1 className="text-2xl font-light text-[#1e3a5f] mb-6">
-          {categoryId && categoryId !== 'undefined' ? category?.name : searchQuery ? `Поиск: ${searchQuery}` : 'Все товары'}
-        </h1>
+        <h1 className="text-2xl font-light text-[#1e3a5f] mb-6">{searchText}</h1>
         
-        {products?.length === 0 ? (
+        {!products || products.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl shadow-lg border-2 border-[#89CFF0]/30">
             <p className="text-gray-500">Товары не найдены</p>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-6">
-            {products?.map(product => (
+            {products.map(product => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
