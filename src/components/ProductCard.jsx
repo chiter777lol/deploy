@@ -5,7 +5,6 @@ import { addToCart } from '../store/cartSlice'
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch()
   
-  // Используем _id из MongoDB или id для совместимости
   const productId = product._id || product.id
 
   return (
