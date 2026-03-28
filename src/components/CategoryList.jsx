@@ -16,7 +16,7 @@ const CategoryList = () => {
         <Link
           to="/products"
           className={`block px-3 py-2 rounded-xl text-sm transition-colors ${
-            !categoryId || categoryId === 'undefined'
+            !categoryId 
               ? 'bg-[#FF6B6B] text-white font-medium' 
               : 'text-[#1e3a5f] hover:bg-[#FFEAA7]'
           }`}
