@@ -25,10 +25,10 @@ const CategoryList = () => {
         </Link>
         {categories?.map(category => (
           <Link
-            key={category.id}
-            to={`/category/${category.id}`}
+            key={category._id}
+            to={`/category/${category._id}`}
             className={`block px-3 py-2 rounded-xl text-sm transition-colors ${
-              Number(categoryId) === category.id 
+              categoryId === category._id 
                 ? 'bg-[#FF6B6B] text-white font-medium' 
                 : 'text-[#1e3a5f] hover:bg-[#FFEAA7]'
             }`}

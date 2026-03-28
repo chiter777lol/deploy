@@ -17,7 +17,7 @@ const ProductListPage = () => {
     queryFn: async () => {
       const params = {}
       
-      if (categoryId) {
+      if (categoryId && categoryId !== 'undefined') {
         params.categoryId = categoryId
       }
       if (searchQuery) {
@@ -35,7 +35,7 @@ const ProductListPage = () => {
   const { data: category } = useQuery({
     queryKey: ['category', categoryId],
     queryFn: () => categoryApi.getById(categoryId).then(res => res.data),
-    enabled: !!categoryId
+    enabled: !!categoryId && categoryId !== 'undefined'
   })
 
   if (isLoading) return <div className="text-center py-8">Загрузка...</div>
@@ -51,7 +51,7 @@ const ProductListPage = () => {
       
       <div className="col-span-9">
         <h1 className="text-2xl font-light text-[#1e3a5f] mb-6">
-          {categoryId ? category?.name : searchQuery ? `Поиск: ${searchQuery}` : 'Все товары'}
+          {categoryId && categoryId !== 'undefined' ? category?.name : searchQuery ? `Поиск: ${searchQuery}` : 'Все товары'}
         </h1>
         
         {products?.length === 0 ? (
@@ -61,7 +61,7 @@ const ProductListPage = () => {
         ) : (
           <div className="grid grid-cols-3 gap-6">
             {products?.map(product => (
-              <ProductCard key={product._id || product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}
