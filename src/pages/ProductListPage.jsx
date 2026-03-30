@@ -18,7 +18,7 @@ const ProductListPage = () => {
       const params = {}
       
       if (categoryId && categoryId !== 'undefined') {
-        params.categoryId = categoryId
+        params.categoryId = parseInt(categoryId)  
       }
       if (searchQuery) {
         params.search = searchQuery
