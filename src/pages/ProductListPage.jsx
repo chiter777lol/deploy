@@ -12,13 +12,26 @@ const ProductListPage = () => {
   const searchQuery = searchParams.get('search')
   const sort = searchParams.get('sort')
 
+  // Получаем все категории
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryApi.getAll().then(res => res.data)
+  })
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', categoryId, searchQuery, sort],
     queryFn: async () => {
       const params = {}
       
       if (categoryId && categoryId !== 'undefined') {
-        params.categoryId = parseInt(categoryId)  
+        // Находим категорию по числовому ID и берем её MongoDB _id
+        const category = categories?.find(c => String(c.id) === categoryId || String(c._id) === categoryId)
+        if (category && category._id) {
+          params.categoryId = category._id  // Отправляем MongoDB ObjectId
+        } else {
+          // Если категория не найдена, возвращаем пустой массив
+          return []
+        }
       }
       if (searchQuery) {
         params.search = searchQuery
@@ -29,7 +42,8 @@ const ProductListPage = () => {
       
       const response = await productApi.getAll(params)
       return response.data
-    }
+    },
+    enabled: !!categories // Ждем загрузки категорий
   })
 
   const { data: category } = useQuery({
@@ -38,7 +52,7 @@ const ProductListPage = () => {
     enabled: !!categoryId && categoryId !== 'undefined'
   })
 
-  if (isLoading) return <div className="text-center py-8">Загрузка...</div>
+  if (isLoading || !categories) return <div className="text-center py-8">Загрузка...</div>
 
   const categoryName = categoryId && categoryId !== 'undefined' && category ? category.name : 'Все товары'
   const searchText = searchQuery ? `Поиск: ${searchQuery}` : categoryName
