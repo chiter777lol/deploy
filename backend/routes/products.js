@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
-const mongoose = require('mongoose');
 
 // GET /api/products
 router.get('/', async (req, res) => {
@@ -14,28 +14,31 @@ router.get('/', async (req, res) => {
     let query = {};
 
     if (req.query.categoryId) {
-      console.log('Фильтр по категории (raw):', req.query.categoryId);
-      
       const categoryIdValue = req.query.categoryId;
+      console.log('Фильтр по категории (raw):', categoryIdValue);
       
-      // Проверяем, является ли categoryId валидным ObjectId (24 символа hex)
-      if (mongoose.Types.ObjectId.isValid(categoryIdValue)) {
-        // Если это ObjectId - ищем прямое совпадение
+      // Проверяем, является ли categoryId валидным ObjectId (24 hex символа)
+      if (categoryIdValue.match(/^[0-9a-fA-F]{24}$/)) {
+        // Это ObjectId - используем напрямую
         query.categoryId = categoryIdValue;
         console.log('Фильтр как ObjectId');
       } else {
-        // Если это не ObjectId (например, число "69") - ищем категорию по другому полю
-        // Но так как у нас categoryId - это ссылка на ObjectId, число не подойдет
-        // Возвращаем пустой результат, чтобы не было ошибки 500
-        console.log('categoryId не является ObjectId, возвращаем пустой результат');
-        return res.json([]);
+        // Это число (например "69") - ищем категорию с таким id
+        const category = await Category.findOne({ id: parseInt(categoryIdValue) });
+        if (category) {
+          query.categoryId = category._id;
+          console.log(`Нашли категорию с id=${categoryIdValue}, используем _id=${category._id}`);
+        } else {
+          console.log(`Категория с id=${categoryIdValue} не найдена`);
+          return res.json([]);
+        }
       }
     }
 
     let products = await Product.find(query).populate('categoryId');
     console.log('Найдено товаров:', products.length);
-    
-    // Если есть поиск по названию
+
+    // Поиск по названию
     if (req.query.search) {
       const searchTerm = req.query.search.toLowerCase();
       products = products.filter(p =>
@@ -71,6 +74,7 @@ router.get('/:id', async (req, res) => {
     }
     res.json(product);
   } catch (error) {
+    console.error('Ошибка при получении товара:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -82,6 +86,7 @@ router.post('/', auth, admin, async (req, res) => {
     await product.save();
     res.status(201).json(product);
   } catch (error) {
+    console.error('Ошибка при создании товара:', error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -99,6 +104,7 @@ router.put('/:id', auth, admin, async (req, res) => {
     }
     res.json(product);
   } catch (error) {
+    console.error('Ошибка при обновлении товара:', error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -112,6 +118,7 @@ router.delete('/:id', auth, admin, async (req, res) => {
     }
     res.status(204).send();
   } catch (error) {
+    console.error('Ошибка при удалении товара:', error);
     res.status(500).json({ message: error.message });
   }
 });
